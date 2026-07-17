@@ -378,7 +378,7 @@
 (function () {
   'use strict';
 
-  const DATA_URL = 'https://raw.githubusercontent.com/WHNXBB/Lijing-sshop/main/products.json';
+  const DATA_URL = 'https://api.github.com/repos/WHNXBB/Lijing-sshop/contents/products.json';
   const PAGE_SIZE = 24;
 
   // DOM refs
@@ -737,12 +737,14 @@
   function fetchProducts() {
     showLoading();
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', DATA_URL + '?t=' + Date.now(), true);
+    xhr.open('GET', DATA_URL, true);
     xhr.timeout = 15000;
     xhr.onload = function () {
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
-          var data = JSON.parse(xhr.responseText);
+          var apiResp = JSON.parse(xhr.responseText);
+          var rawContent = atob(apiResp.content.replace(/\n/g, ''));
+          var data = JSON.parse(rawContent);
           allProducts = Array.isArray(data) ? data : (data && Array.isArray(data.products) ? data.products : []);
           if (allProducts.length === 0) { showEmpty('暂无商品数据。'); return; }
           buildCategories(allProducts);
