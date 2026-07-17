@@ -199,6 +199,63 @@
       padding: 0 4px; color: #999; font-size: 14px;
     }
 
+
+    /* ===== Contact Modal ===== */
+    .modal-overlay {
+      display: none; position: fixed; z-index: 999;
+      inset: 0; background: rgba(0,0,0,0.4);
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #fff; border-radius: 12px; padding: 32px 28px 28px;
+      max-width: 360px; width: 90%; box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+      position: relative; animation: modalIn .3s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.92) translateY(12px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-box .modal-close {
+      position: absolute; top: 12px; right: 14px;
+      background: none; border: none; font-size: 22px;
+      color: #999; cursor: pointer; line-height: 1;
+    }
+    .modal-box .modal-close:hover { color: #333; }
+    .modal-box .modal-title {
+      font-size: 17px; font-weight: 600; color: #333;
+      margin-bottom: 20px; padding-right: 20px;
+    }
+    .modal-box .modal-field {
+      display: flex; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid #f0f0f0;
+    }
+    .modal-box .modal-field:last-child { border-bottom: none; }
+    .modal-box .modal-field .label {
+      width: 70px; font-size: 14px; color: #999; flex-shrink: 0;
+    }
+    .modal-box .modal-field .value {
+      flex: 1; font-size: 15px; color: #333; font-weight: 500;
+    }
+    .modal-box .modal-field .copy-btn {
+      padding: 4px 12px; border: 1px solid var(--jd-red);
+      background: #fff; color: var(--jd-red); border-radius: 4px;
+      font-size: 12px; cursor: pointer; transition: all .2s;
+    }
+    .modal-box .modal-field .copy-btn:hover {
+      background: var(--jd-red); color: #fff;
+    }
+    .modal-box .modal-field .copy-btn.copied {
+      background: #52c41a; border-color: #52c41a; color: #fff;
+    }
+    .contact-btn {
+      display: inline-block; margin-top: 8px;
+      padding: 6px 14px; border: 1px solid var(--jd-red);
+      background: #fff; color: var(--jd-red); border-radius: 4px;
+      font-size: 12px; cursor: pointer; transition: all .2s;
+      text-align: center;
+    }
+    .contact-btn:hover { background: var(--jd-red); color: #fff; }
     /* ===== Footer ===== */
     .footer {
       border-top: 1px solid #eee; padding: 20px 0;
@@ -295,6 +352,24 @@
 </main>
 
 <!-- ===== Footer ===== -->
+
+<!-- ===== Contact Modal ===== -->
+<div class="modal-overlay" id="contactModal">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-title" id="modalProductTitle">联系商家</div>
+    <div class="modal-field">
+      <span class="label">📞 电话</span>
+      <span class="value" id="modalPhone">-</span>
+      <button class="copy-btn" data-copy="phone">复制</button>
+    </div>
+    <div class="modal-field">
+      <span class="label">💬 微信</span>
+      <span class="value" id="modalWechat">-</span>
+      <button class="copy-btn" data-copy="wechat">复制</button>
+    </div>
+  </div>
+</div>
 <footer class="footer">
   <div class="container">&copy; 2026 我的商城 &mdash; 用心发现好物</div>
 </footer>
@@ -534,6 +609,18 @@
       body.appendChild(title);
       body.appendChild(price);
       body.appendChild(desc);
+
+      var contactBtn = document.createElement("button");
+      contactBtn.className = "contact-btn";
+      contactBtn.textContent = "📞 联系商家";
+      contactBtn.dataset.phone = product.phone || "";
+      contactBtn.dataset.wechat = product.wechat || "";
+      contactBtn.dataset.title = product.title || "";
+      contactBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        openContactModal(this.dataset);
+      });
+      body.appendChild(contactBtn);
       card.appendChild(imgDiv);
       card.appendChild(body);
       fragment.appendChild(card);
@@ -670,6 +757,60 @@
 
   $retryBtn.addEventListener('click', fetchProducts);
   fetchProducts();
+
+  /* ---------- Contact Modal ---------- */
+  var $modal = document.getElementById("contactModal");
+  var $modalTitle = document.getElementById("modalProductTitle");
+  var $modalPhone = document.getElementById("modalPhone");
+  var $modalWechat = document.getElementById("modalWechat");
+  var $modalClose = document.getElementById("modalClose");
+
+  function openContactModal(data) {
+    $modalTitle.textContent = "📦 " + (data.title || "联系商家");
+    $modalPhone.textContent = data.phone || "未填写";
+    $modalWechat.textContent = data.wechat || "未填写";
+    $modal.classList.add("active");
+  }
+
+  $modalClose.addEventListener("click", function () {
+    $modal.classList.remove("active");
+  });
+  $modal.addEventListener("click", function (e) {
+    if (e.target === $modal) $modal.classList.remove("active");
+  });
+
+  /* Copy to clipboard */
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var field = this.dataset.copy;
+      var text = field === "phone" ? $modalPhone.textContent : $modalWechat.textContent;
+      if (text === "未填写") return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          var orig = this.textContent;
+          this.textContent = "已复制";
+          this.classList.add("copied");
+          var self = this;
+          setTimeout(function () {
+            self.textContent = orig;
+            self.classList.remove("copied");
+          }, 1500);
+        }.bind(this)).catch(function () { fallbackCopy(text, this); }.bind(this));
+      } else {
+        fallbackCopy(text, this);
+      }
+    });
+  });
+
+  function fallbackCopy(text, btn) {
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); btn.textContent = "已复制"; btn.classList.add("copied");
+      setTimeout(function () { btn.textContent = "复制"; btn.classList.remove("copied"); }, 1500);
+    } catch (e) {}
+    document.body.removeChild(ta);
+  }
 })();
 </script>
 </body>
