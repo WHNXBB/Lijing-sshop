@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="发现精选好物 — 优质商品展示平台">
+  <title>精品商城 — 发现好物</title>
+
+  <!-- 预加载首屏关键资源 -->
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link rel="dns-prefetch" href="https://images.unsplash.com">
+
+  <style>
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html {
+      font-size: 16px;
+      -webkit-text-size-adjust: 100%;
+      scroll-behavior: smooth;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+                   "Helvetica Neue", Arial, sans-serif;
+      color: #1a1a1a;
+      background: #f4f5f7;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    img { display: block; max-width: 100%; height: auto; }
+
+    /* ===== Layout ===== */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ===== Header ===== */
+    .site-header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .site-header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .site-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: 0.02em;
+    }
+    .site-title span { color: #2563eb; }
+
+    /* Search Bar */
+    .search-wrapper {
+      flex: 1;
+      max-width: 400px;
+      min-width: 200px;
+      position: relative;
+    }
+    .search-wrapper input {
+      width: 100%;
+      padding: 10px 16px 10px 40px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #f9fafb;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-wrapper input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+      background: #fff;
+    }
+    .search-wrapper .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      pointer-events: none;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    /* Product Count */
+    .product-count {
+      font-size: 14px;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+    .product-count strong { color: #1a1a1a; }
+
+    /* ===== Main Content ===== */
+    .main-content {
+      padding: 32px 0 60px;
+    }
+
+    /* ===== Loading State ===== */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 20px;
+      text-align: center;
+    }
+    .loading-state .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      margin-bottom: 20px;
+    }
+    .loading-state p {
+      font-size: 15px;
+      color: #6b7280;
+    }
+
+    /* ===== Error State ===== */
+    .error-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      text-align: center;
+    }
+    .error-state .error-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .error-state h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #dc2626;
+    }
+    .error-state p {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+    .error-state .retry-btn {
+      padding: 10px 28px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .error-state .retry-btn:hover { background: #1d4ed8; }
+
+    /* ===== Empty State ===== */
+    .empty-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      text-align: center;
+    }
+    .empty-state .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .empty-state h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #374151;
+    }
+    .empty-state p {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    /* ===== Product Grid ===== */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .product-grid.visible { opacity: 1; }
+
+    /* ===== Product Card ===== */
+    .product-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
+    }
+
+    .product-card .card-image {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #f3f4f6;
+      overflow: hidden;
+    }
+    .product-card .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease, opacity 0.3s ease;
+    }
+    .product-card:hover .card-image img { transform: scale(1.05); }
+
+    /* Image placeholder while loading */
+    .product-card .card-image img:not([src]) { opacity: 0; }
+    .product-card .card-image img[src] { opacity: 0; }
+    .product-card .card-image img.loaded { opacity: 1; }
+
+    .product-card .card-body {
+      padding: 16px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .product-card .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 6px;
+      color: #1a1a1a;
+      /* 最多两行 */
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .product-card .card-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: #2563eb;
+      margin-bottom: 8px;
+      letter-spacing: 0.01em;
+    }
+    .product-card .card-desc {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    /* ===== Footer ===== */
+    .site-footer {
+      border-top: 1px solid #e8e8e8;
+      padding: 24px 0;
+      text-align: center;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    /* ===== Animations ===== */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .product-card {
+      animation: fadeInUp 0.35s ease backwards;
+    }
+    .product-card:nth-child(1) { animation-delay: 0.02s; }
+    .product-card:nth-child(2) { animation-delay: 0.04s; }
+    .product-card:nth-child(3) { animation-delay: 0.06s; }
+    .product-card:nth-child(4) { animation-delay: 0.08s; }
+    .product-card:nth-child(5) { animation-delay: 0.10s; }
+    .product-card:nth-child(6) { animation-delay: 0.12s; }
+    .product-card:nth-child(7) { animation-delay: 0.14s; }
+    .product-card:nth-child(8) { animation-delay: 0.16s; }
+    .product-card:nth-child(9) { animation-delay: 0.18s; }
+    .product-card:nth-child(10) { animation-delay: 0.20s; }
+    .product-card:nth-child(11) { animation-delay: 0.22s; }
+    .product-card:nth-child(12) { animation-delay: 0.24s; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .container { padding: 0 16px; }
+      .site-header .container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-wrapper { max-width: 100%; }
+      .site-title { font-size: 20px; text-align: center; }
+      .product-count { text-align: center; }
+      .product-grid { gap: 16px; }
+    }
+    @media (max-width: 480px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .main-content { padding: 20px 0 40px; }
+      .product-card .card-body { padding: 14px 16px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="site-header">
+  <div class="container">
+    <div class="site-title">精品<span>商城</span></div>
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜索商品名称…" autocomplete="off">
+    </div>
+    <div class="product-count" id="productCount">共 <strong id="countNum">0</strong> 件商品</div>
+  </div>
+</header>
+
+<!-- ===== Main ===== -->
+<main class="main-content">
+  <div class="container">
+
+    <!-- Loading -->
+    <div class="loading-state" id="loadingState">
+      <div class="spinner"></div>
+      <p>正在加载商品数据…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-state" id="errorState">
+      <div class="error-icon">⚠️</div>
+      <h2>加载失败</h2>
+      <p>无法获取商品数据，请检查网络连接后重试。</p>
+      <button class="retry-btn" id="retryBtn">重新加载</button>
+    </div>
+
+    <!-- Empty -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">📦</div>
+      <h2>暂无商品</h2>
+      <p>商品数据为空，请前往后台管理添加商品。</p>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="product-grid" id="productGrid"></div>
+
+  </div>
+</main>
+
+<!-- ===== Footer ===== -->
+<footer class="site-footer">
+  <div class="container">
+    &copy; 2026 精品商城 &mdash; 用心发现好物
+  </div>
+</footer>
+
+<!-- ===== JavaScript ===== -->
+<script>
+(function () {
+  'use strict';
+
+  const DATA_URL = '/products.json';
+
+  const $grid          = document.getElementById('productGrid');
+  const $loading       = document.getElementById('loadingState');
+  const $error         = document.getElementById('errorState');
+  const $empty         = document.getElementById('emptyState');
+  const $retryBtn      = document.getElementById('retryBtn');
+  const $searchInput   = document.getElementById('searchInput');
+  const $countNum      = document.getElementById('countNum');
+
+  let allProducts   = [];
+  let filteredProducts = [];
+
+  /* ---------- 状态切换 ---------- */
+  function showLoading() {
+    $loading.style.display = 'flex';
+    $error.style.display   = 'none';
+    $empty.style.display   = 'none';
+    $grid.classList.remove('visible');
+    $grid.innerHTML = '';
+  }
+
+  function showError() {
+    $loading.style.display = 'none';
+    $error.style.display   = 'flex';
+    $empty.style.display   = 'none';
+    $grid.classList.remove('visible');
+  }
+
+  function showEmpty() {
+    $loading.style.display = 'none';
+    $error.style.display   = 'none';
+    $empty.style.display   = 'flex';
+    $grid.classList.remove('visible');
+    $countNum.textContent = '0';
+  }
+
+  function showGrid() {
+    $loading.style.display = 'none';
+    $error.style.display   = 'none';
+    $empty.style.display   = 'none';
+  }
+
+  /* ---------- 渲染商品卡片 ---------- */
+  function renderProducts(products) {
+    if (!products || products.length === 0) {
+      showEmpty();
+      return;
+    }
+
+    showGrid();
+    $countNum.textContent = products.length;
+
+    // 当数据量较大时（200+），使用 DocumentFragment 批量插入
+    const fragment = document.createDocumentFragment();
+
+    products.forEach(function (product) {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+
+      // 图片容器
+      const imgWrapper = document.createElement('div');
+      imgWrapper.className = 'card-image';
+
+      const img = document.createElement('img');
+      img.src = product.image || '';
+      img.alt = product.title || '商品图片';
+      img.loading = 'lazy';                          // 懒加载
+      img.width = 400;
+      img.height = 400;
+      // 图片加载完成后添加 loaded class 触发淡入
+      img.addEventListener('load', function onLoad() {
+        img.classList.add('loaded');
+        img.removeEventListener('load', onLoad);
+      });
+      // 如果图片加载失败，显示占位色块
+      img.addEventListener('error', function () {
+        img.style.display = 'none';
+      });
+
+      imgWrapper.appendChild(img);
+
+      // 卡片正文
+      const body = document.createElement('div');
+      body.className = 'card-body';
+
+      const title = document.createElement('div');
+      title.className = 'card-title';
+      title.textContent = product.title || '未命名商品';
+
+      const price = document.createElement('div');
+      price.className = 'card-price';
+      price.textContent = product.price || '';
+
+      const desc = document.createElement('div');
+      desc.className = 'card-desc';
+      desc.textContent = product.description || '暂无描述';
+
+      body.appendChild(title);
+      body.appendChild(price);
+      body.appendChild(desc);
+
+      card.appendChild(imgWrapper);
+      card.appendChild(body);
+      fragment.appendChild(card);
+    });
+
+    $grid.innerHTML = '';
+    $grid.appendChild(fragment);
+    // 触发淡入动画
+    requestAnimationFrame(function () {
+      $grid.classList.add('visible');
+    });
+  }
+
+  /* ---------- 搜索过滤 ---------- */
+  function filterProducts(query) {
+    if (!query.trim()) {
+      filteredProducts = allProducts.slice();
+    } else {
+      var q = query.trim().toLowerCase();
+      filteredProducts = allProducts.filter(function (p) {
+        return (p.title && p.title.toLowerCase().indexOf(q) !== -1)
+            || (p.description && p.description.toLowerCase().indexOf(q) !== -1);
+      });
+    }
+    renderProducts(filteredProducts);
+  }
+
+  /* ---------- 防抖 ---------- */
+  function debounce(fn, delay) {
+    var timer = null;
+    return function () {
+      var ctx = this, args = arguments;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () { fn.apply(ctx, args); }, delay);
+    };
+  }
+
+  /* ---------- 获取数据 ---------- */
+  function fetchProducts() {
+    showLoading();
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', DATA_URL + '?t=' + Date.now(), true);
+    xhr.timeout = 15000;
+
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          if (Array.isArray(data)) {
+            allProducts = data;
+          } else if (data && Array.isArray(data.products)) {
+            allProducts = data.products;
+          } else {
+            allProducts = [];
+          }
+          filteredProducts = allProducts.slice();
+          renderProducts(filteredProducts);
+        } catch (e) {
+          console.error('JSON 解析失败:', e);
+          showError();
+        }
+      } else {
+        showError();
+      }
+    };
+
+    xhr.onerror = function () { showError(); };
+    xhr.ontimeout = function () { showError(); };
+
+    xhr.send();
+  }
+
+  /* ---------- 搜索监听 (防抖 200ms) ---------- */
+  $searchInput.addEventListener('input', debounce(function () {
+    filterProducts(this.value);
+  }, 200));
+
+  /* ---------- 重试 ---------- */
+  $retryBtn.addEventListener('click', fetchProducts);
+
+  /* ---------- 启动 ---------- */
+  fetchProducts();
+
+})();
+</script>
+
+</body>
+</html>
