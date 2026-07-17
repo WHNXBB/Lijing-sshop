@@ -8,87 +8,92 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;color:#333}
 .header{background:#E4393C;color:#fff;padding:16px 24px;font-size:20px;font-weight:700}
+.header .sub{font-size:13px;font-weight:400;opacity:.8;margin-left:12px}
 .container{max-width:1200px;margin:0 auto;padding:20px 24px}
 .card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:20px;margin-bottom:20px}
-.card h2{font-size:16px;margin-bottom:16px;color:#333}
+.card h2{font-size:16px;margin-bottom:16px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .form-row.full{grid-template-columns:1fr}
 .form-row label{font-size:13px;color:#666;display:block;margin-bottom:4px}
-.form-row input,.form-row textarea,.form-row select{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px}
-.form-row textarea{resize:vertical;min-height:60px}
-.btn{padding:8px 20px;border:none;border-radius:4px;font-size:14px;cursor:pointer}
+.form-row input,.form-row textarea{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px}
+.form-row textarea{resize:vertical;min-height:54px}
+.btn{padding:8px 20px;border:none;border-radius:4px;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
 .btn-primary{background:#E4393C;color:#fff}
 .btn-primary:hover{background:#c12e30}
-.btn-danger{background:#999;color:#fff;font-size:13px}
-.btn-danger:hover{background:#777}
-.btn-sm{padding:4px 12px;font-size:12px}
+.btn-danger{background:#bbb;color:#fff}
+.btn-danger:hover{background:#999}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-success{background:#52c41a;color:#fff}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #f0f0f0}
-th{background:#fafafa;font-weight:600;color:#666;font-size:12px}
-td{vertical-align:top}
-td img{width:50px;height:50px;object-fit:cover;border-radius:4px}
+th{background:#fafafa;font-weight:600;color:#666;font-size:12px;white-space:nowrap}
+td img{width:46px;height:46px;object-fit:cover;border-radius:4px}
 .actions{white-space:nowrap}
-.actions button{margin-right:4px}
-.status{display:inline-block;padding:4px 12px;border-radius:4px;font-size:12px}
-.status.loading{background:#fff3cd;color:#856404}
-.status.success{background:#d4edda;color:#155724}
-.status.error{background:#f8d7da;color:#721c24}
+.actions button{margin-right:3px}
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:500}
+.badge-green{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
+.badge-orange{background:#fff7e6;color:#fa8c16;border:1px solid #ffd591}
+.badge-blue{background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff}
 .login-box{max-width:400px;margin:80px auto;text-align:center}
-.login-box h2{margin-bottom:12px;font-size:18px}
-.login-box p{font-size:13px;color:#999;margin-bottom:16px}
-.login-box input{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:4px;font-size:14px;margin-bottom:12px;text-align:center}
-#loading{display:none;text-align:center;padding:60px}
+.login-box h2{margin-bottom:12px}
+.login-box p{font-size:13px;color:#999;margin:8px 0 16px}
+.login-box input{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:4px;font-size:14px;margin-bottom:10px;text-align:center}
+#loading{display:none;text-align:center;padding:60px;color:#999}
 #error{display:none;text-align:center;padding:60px}
 #error p{color:#c00;margin-bottom:12px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center;z-index:999}
 .modal.active{display:flex}
-.modal-box{background:#fff;border-radius:12px;padding:28px;width:90%;max-width:600px;max-height:90vh;overflow-y:auto;position:relative}
-.modal-box h2{margin-bottom:16px}
-.modal-box .btn{margin-top:12px;margin-right:8px}
+.modal-box{background:#fff;border-radius:12px;padding:28px;width:90%;max-width:620px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.modal-box h2{margin-bottom:16px;font-size:17px}
+.modal-box .btn{margin-top:8px;margin-right:8px}
+.form-hint{font-size:11px;color:#bbb;margin-top:2px}
 @media(max-width:768px){.form-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<div class="header">&#x2605; 后台管理 — 商品管理</div>
+<div class="header">&#x2605; 后台管理 <span class="sub">商品增删改查</span></div>
 <div class="container">
 
 <!-- Login -->
 <div id="loginBox" class="login-box card">
-  <h2>🔑 输入访问令牌</h2>
-  <p>请输入你的 GitHub Personal Access Token 以管理商品数据</p>
-  <input type="password" id="tokenInput" placeholder="输入 ghp_... 开头的 Token" autocomplete="off">
+  <h2>🔑 输入 GitHub Token</h2>
+  <p>请输入你的 Personal Access Token 以管理商品</p>
+  <input type="password" id="tokenInput" placeholder="以 ghp_ 开头的 Token" autocomplete="off">
   <button class="btn btn-primary" onclick="login()" style="width:100%">登录</button>
-  <p style="margin-top:12px;font-size:12px;color:#999">Token 仅保存在你的浏览器本地，不会上传到其他服务器</p>
   <div id="loginError" style="color:#c00;font-size:13px;margin-top:8px;display:none"></div>
 </div>
 
 <!-- Loading -->
-<div id="loading"><p>正在加载商品数据…</p></div>
+<div id="loading"><p>加载中…</p></div>
 
 <!-- Error -->
 <div id="error">
   <p id="errorMsg">加载失败</p>
   <button class="btn btn-primary" onclick="loadProducts()">重试</button>
-  <button class="btn btn-danger" onclick="logout()" style="margin-left:8px">更换 Token</button>
+  <button class="btn btn-danger" onclick="logout()">更换 Token</button>
 </div>
 
 <!-- Content -->
 <div id="content" style="display:none">
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">
-      <h2 style="margin:0">商品列表 <span id="count" style="font-weight:400;color:#999;font-size:13px"></span></h2>
-      <div><button class="btn btn-primary" onclick="openAddModal()">+ 添加商品</button>
-      <button class="btn btn-danger" onclick="logout()" style="margin-left:6px">退出</button></div>
+  <!-- Toolbar -->
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+    <div style="font-size:14px;color:#666">共 <strong id="count" style="color:#E4393C">0</strong> 件商品</div>
+    <div>
+      <button class="btn btn-primary" onclick="openAddModal()">+ 添加商品</button>
+      <button class="btn btn-danger" onclick="logout()">退出登录</button>
     </div>
-    <div style="overflow-x:auto">
-      <table id="productTable">
-        <thead><tr>
-          <th>图片</th><th>名称</th><th>价格</th><th>分类</th><th>电话</th><th>微信</th><th>操作</th>
-        </tr></thead>
-        <tbody id="productBody"></tbody>
-      </table>
-    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card" style="padding:0;overflow-x:auto">
+    <table>
+      <thead><tr>
+        <th>图片</th><th>名称</th><th>价格</th><th>分类</th>
+        <th>📞 电话</th><th>💬 微信</th><th>库存</th><th>已售</th><th>操作</th>
+      </tr></thead>
+      <tbody id="productBody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -97,18 +102,29 @@ td img{width:50px;height:50px;object-fit:cover;border-radius:4px}
 <!-- Edit Modal -->
 <div class="modal" id="editModal">
   <div class="modal-box">
-    <h2 id="modalTitle">添加商品</h2>
-    <div class="form-row"><label>商品名称</label><input id="f_title" placeholder="输入商品名称"></div>
-    <div class="form-row"><label>价格</label><input id="f_price" placeholder="如 128.00"></div>
+    <h2 id="modalTitle">编辑商品</h2>
+    <div class="form-row">
+      <div><label>商品名称 *</label><input id="f_title" placeholder="输入名称"></div>
+      <div><label>价格 *</label><input id="f_price" placeholder="如 128.00"></div>
+    </div>
     <div class="form-row full"><label>描述</label><textarea id="f_desc" placeholder="商品描述"></textarea></div>
-    <div class="form-row"><label>分类</label><input id="f_cat" placeholder="如 手机、数码、家居"></div>
-    <div class="form-row"><label>厂家电话</label><input id="f_phone" placeholder="联系电话"></div>
-    <div class="form-row"><label>厂家微信</label><input id="f_wechat" placeholder="微信号"></div>
-    <div class="form-row full"><label>图片链接</label><input id="f_image" placeholder="https://..."></div>
+    <div class="form-row">
+      <div><label>分类</label><input id="f_cat" placeholder="如 手机、数码、家居"></div>
+      <div><label>📞 厂家电话</label><input id="f_phone" placeholder="如 13800138000"></div>
+    </div>
+    <div class="form-row">
+      <div><label>💬 厂家微信</label><input id="f_wechat" placeholder="微信号"></div>
+      <div><label>📦 库存量</label><input id="f_stock" placeholder="如 100" type="number"></div>
+    </div>
+    <div class="form-row">
+      <div><label>📊 已卖货量</label><input id="f_sold" placeholder="如 0" type="number"></div>
+      <div><label>图片链接</label><input id="f_image" placeholder="https://..."></div>
+    </div>
+    <div class="form-hint" style="margin-bottom:8px">* 为必填项</div>
     <div>
-      <button class="btn btn-primary" id="saveBtn" onclick="saveProduct()">保存</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveProduct()">💾 保存</button>
       <button class="btn btn-danger" onclick="closeModal()">取消</button>
-      <span id="saveStatus" class="status" style="margin-left:8px;display:none"></span>
+      <span id="saveStatus" style="margin-left:8px;display:none"></span>
     </div>
   </div>
 </div>
@@ -121,103 +137,103 @@ const FILE = "products.json";
 var TOKEN = "";
 var products = [];
 var editIndex = -1;
+var currentSHA = "";
 
 function $(id){return document.getElementById(id)}
 
+/* ====== Base64 (Unicode safe) ====== */
+function utf8ToB64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function b64ToUtf8(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+/* ====== Auth ====== */
 function logout(){
   localStorage.removeItem("adminToken");
-  TOKEN = "";
-  $("loginBox").style.display = "block";
-  $("content").style.display = "none";
-  $("loading").style.display = "none";
-  $("error").style.display = "none";
+  TOKEN = ""; $("loginBox").style.display = "block";
+  $("content").style.display = "none"; $("loading").style.display = "none"; $("error").style.display = "none";
 }
 
 function login(){
-  const token = $("tokenInput").value.trim();
-  if(!token || !token.startsWith("ghp_")){
-    $("loginError").style.display = "block";
-    $("loginError").textContent = "请输入有效的 GitHub Token（以 ghp_ 开头）";
+  const t = $("tokenInput").value.trim();
+  if(!t.startsWith("ghp_")){
+    $("loginError").style.display = "block"; $("loginError").textContent = "请输入有效的 Token（以 ghp_ 开头）";
     return;
   }
-  $("loginError").style.display = "none";
-  TOKEN = token;
-  localStorage.setItem("adminToken", TOKEN);
-  loadProducts();
+  $("loginError").style.display = "none"; TOKEN = t;
+  localStorage.setItem("adminToken", TOKEN); loadProducts();
 }
 
-// Auto-login on page load
 document.addEventListener("DOMContentLoaded", function(){
   const saved = localStorage.getItem("adminToken");
-  if(saved && saved.startsWith("ghp_")){
-    TOKEN = saved;
-    $("tokenInput").value = "••••••••••••••••";
-    $("loginBox").style.display = "none";
-    loadProducts();
-  }
+  if(saved && saved.startsWith("ghp_")){ TOKEN = saved; $("tokenInput").value="••••••••••"; loadProducts(); }
 });
 
-function getHeaders(){
-  return {Authorization: `token ${TOKEN}`, Accept: "application/vnd.github.v3+json"};
-}
+function hd(){ return {Authorization:`token ${TOKEN}`, Accept:"application/vnd.github.v3+json"} }
 
+/* ====== CRUD ====== */
 async function loadProducts(){
-  $("loading").style.display = "block";
-  $("error").style.display = "none";
-  $("content").style.display = "none";
+  $("loading").style.display="block"; $("error").style.display="none"; $("content").style.display="none";
   try {
-    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {headers: getHeaders()});
-    if(r.status === 401 || r.status === 403) { logout(); $("loginError").textContent = "Token 无效或已过期，请重新输入"; $("loginError").style.display = "block"; return; }
+    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {headers:hd()});
+    if(r.status===401||r.status===403){ logout(); $("loginBox").style.display="block"; $("loginError").textContent="Token 无效，请重新输入"; $("loginError").style.display="block"; return; }
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     const d = await r.json();
-    const txt = atob(d.content.replace(/\n/g,''));
+    currentSHA = d.sha;
+    const txt = b64ToUtf8(d.content);
     products = JSON.parse(txt);
-    if(!document.getElementById("sha")){
-      document.body.insertAdjacentHTML('beforeend',`<input type=hidden id=sha value="${d.sha}">`);
-    } else { document.getElementById("sha").value = d.sha; }
     renderTable();
-    $("loading").style.display = "none";
-    $("content").style.display = "block";
+    $("loading").style.display="none"; $("content").style.display="block";
   } catch(e) {
-    $("loading").style.display = "none";
-    $("error").style.display = "block";
-    $("errorMsg").textContent = "加载失败: " + e.message;
+    $("loading").style.display="none"; $("error").style.display="block"; $("errorMsg").textContent="加载失败: "+e.message;
   }
 }
 
 function renderTable(){
-  const tbody = $("productBody");
-  $("count").textContent = `(${products.length}件)`;
-  tbody.innerHTML = products.map((p,i) => `<tr>
+  $("productBody").innerHTML = products.map((p,i) => `<tr>
     <td><img src="${esc(p.image||'')}" onerror="this.style.display='none'" alt=""></td>
-    <td>${esc(p.title)}</td>
-    <td style="color:#E4393C;font-weight:600">¥${parseFloat(p.price).toFixed(2)}</td>
-    <td>${esc(p.category||'-')}</td>
-    <td>${esc(p.phone||'-')}</td>
-    <td>${esc(p.wechat||'-')}</td>
+    <td><strong>${esc(p.title)}</strong></td>
+    <td style="color:#E4393C;font-weight:600">¥${Number(p.price).toFixed(2)}</td>
+    <td>${p.category ? '<span class="badge badge-blue">'+esc(p.category)+'</span>' : '-'}</td>
+    <td>${p.phone ? '<span class="badge badge-green">'+esc(p.phone)+'</span>' : '<span style="color:#ccc">-</span>'}</td>
+    <td>${p.wechat ? '<span class="badge badge-orange">'+esc(p.wechat)+'</span>' : '<span style="color:#ccc">-</span>'}</td>
+    <td style="text-align:center">${p.stock!==undefined ? p.stock : '-'}</td>
+    <td style="text-align:center">${p.sold!==undefined ? p.sold : '-'}</td>
     <td class="actions">
       <button class="btn btn-primary btn-sm" onclick="openEditModal(${i})">编辑</button>
       <button class="btn btn-danger btn-sm" onclick="deleteProduct(${i})">删除</button>
     </td>
   </tr>`).join('');
+  $("count").textContent = products.length;
 }
 
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 
 function openAddModal(){
-  editIndex = -1; $("modalTitle").textContent = "添加商品";
-  ["f_title","f_price","f_desc","f_cat","f_phone","f_wechat","f_image"].forEach(id => $(id).value="");
-  $("saveStatus").style.display = "none"; $("editModal").classList.add("active");
+  editIndex=-1; $("modalTitle").textContent="添加商品";
+  ["f_title","f_price","f_desc","f_cat","f_phone","f_wechat","f_stock","f_sold","f_image"].forEach(id=>$(id).value="");
+  $("f_stock").value="100"; $("f_sold").value="0";
+  $("saveStatus").style.display="none"; $("editModal").classList.add("active");
 }
 
 function openEditModal(idx){
-  editIndex = idx; const p = products[idx];
-  $("modalTitle").textContent = "编辑商品";
-  $("f_title").value = p.title||""; $("f_price").value = p.price||"";
-  $("f_desc").value = p.description||""; $("f_cat").value = p.category||"";
-  $("f_phone").value = p.phone||""; $("f_wechat").value = p.wechat||"";
-  $("f_image").value = p.image||"";
-  $("saveStatus").style.display = "none"; $("editModal").classList.add("active");
+  editIndex=idx; const p=products[idx];
+  $("modalTitle").textContent="编辑商品";
+  $("f_title").value=p.title||""; $("f_price").value=p.price||"";
+  $("f_desc").value=p.description||""; $("f_cat").value=p.category||"";
+  $("f_phone").value=p.phone||""; $("f_wechat").value=p.wechat||"";
+  $("f_stock").value=p.stock!==undefined?p.stock:"100";
+  $("f_sold").value=p.sold!==undefined?p.sold:"0";
+  $("f_image").value=p.image||"";
+  $("saveStatus").style.display="none"; $("editModal").classList.add("active");
 }
 
 function closeModal(){ $("editModal").classList.remove("active"); }
@@ -227,49 +243,66 @@ async function saveProduct(){
     title: $("f_title").value.trim(), price: $("f_price").value.trim(),
     description: $("f_desc").value.trim(), category: $("f_cat").value.trim(),
     phone: $("f_phone").value.trim(), wechat: $("f_wechat").value.trim(),
+    stock: parseInt($("f_stock").value) || 0,
+    sold: parseInt($("f_sold").value) || 0,
     image: $("f_image").value.trim()
   };
-  if(!p.title || !p.price){alert("请至少填写名称和价格");return}
+  if(!p.title || !p.price){ alert("请填写商品名称和价格"); return; }
+
   const btn = $("saveBtn"); const st = $("saveStatus");
-  btn.disabled = true; btn.textContent = "保存中…";
-  st.style.display = "inline"; st.className = "status loading"; st.textContent = "正在保存…";
+  btn.disabled=true; btn.innerHTML="⏳ 保存中…";
+  st.style.display="inline"; st.innerHTML='<span class="badge badge-orange">⏳ 正在保存…</span>';
+
   try {
-    if(editIndex >= 0) products[editIndex] = p; else products.push(p);
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(products,null,2))));
-    const sha = document.getElementById("sha").value;
+    if(editIndex>=0) products[editIndex]=p; else products.push(p);
+    const content = utf8ToB64(JSON.stringify(products,null,2));
     const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {
       method: "PUT",
-      headers: {...getHeaders(), "Content-Type":"application/json"},
-      body: JSON.stringify({message: editIndex>=0 ? `编辑: ${p.title}` : `添加: ${p.title}`, content, sha, branch:"main"})
+      headers: {...hd(), "Content-Type":"application/json"},
+      body: JSON.stringify({
+        message: editIndex>=0 ? `编辑商品: ${p.title}` : `添加商品: ${p.title}`,
+        content, sha: currentSHA, branch:"main"
+      })
     });
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    if(!r.ok){
+      const err = await r.text();
+      throw new Error(`HTTP ${r.status}: ${err.slice(0,100)}`);
+    }
     const d = await r.json();
-    document.getElementById("sha").value = d.content.sha;
-    st.className = "status success"; st.textContent = "✅ 保存成功！";
+    currentSHA = d.content.sha;
+    st.innerHTML='<span class="badge badge-green">✅ 保存成功！</span>';
     renderTable();
-    setTimeout(()=>{closeModal();st.style.display="none"},1000);
+    setTimeout(()=>{ closeModal(); st.style.display="none"; }, 800);
   } catch(e) {
-    st.className = "status error"; st.textContent = "❌ 保存失败: "+e.message;
+    st.innerHTML='<span style="color:#c00">❌ 失败: '+e.message+'</span>';
   }
-  btn.disabled=false; btn.textContent="保存";
+  btn.disabled=false; btn.innerHTML="💾 保存";
 }
 
 async function deleteProduct(idx){
-  if(!confirm(`确定删除「${products[idx].title}」？`)) return;
+  if(!confirm(`确定要删除「${products[idx].title}」吗？`)) return;
   try {
-    const p = products[idx]; products.splice(idx,1);
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(products,null,2))));
-    const sha = document.getElementById("sha").value;
+    const t = products[idx].title;
+    products.splice(idx,1);
+    const content = utf8ToB64(JSON.stringify(products,null,2));
     const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {
       method: "PUT",
-      headers: {...getHeaders(), "Content-Type":"application/json"},
-      body: JSON.stringify({message: `删除: ${p.title}`, content, sha, branch:"main"})
+      headers: {...hd(), "Content-Type":"application/json"},
+      body: JSON.stringify({message: `删除商品: ${t}`, content, sha: currentSHA, branch:"main"})
     });
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    if(!r.ok){
+      const err = await r.text();
+      // 409 = SHA conflict, reload data
+      if(r.status===409){ alert("数据冲突，已重新加载，请再试一次"); await loadProducts(); return; }
+      throw new Error(`HTTP ${r.status}`);
+    }
     const d = await r.json();
-    document.getElementById("sha").value = d.content.sha;
+    currentSHA = d.content.sha;
     renderTable();
-  } catch(e){ alert("删除失败: "+e.message); loadProducts(); }
+  } catch(e){
+    alert("删除失败: "+e.message);
+    await loadProducts();
+  }
 }
 
 document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
