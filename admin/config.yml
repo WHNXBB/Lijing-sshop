@@ -48,6 +48,22 @@ collections:
         required: false
         hint: "例如：手机、数码、家居、配件"
 
+      # === 新增字段：厂家联系方式 ===
+      - label: "厂家电话"
+        name: "phone"
+        widget: "string"
+        required: false
+        hint: "例如：13800138000"
+        default: "13800138000"
+
+      - label: "厂家微信"
+        name: "wechat"
+        widget: "string"
+        required: false
+        hint: "例如：wechat_id"
+        default: "wechat_id"
+      # === 新增字段结束 ===
+
       - label: "商品主图"
         name: "image"
         widget: "image"
