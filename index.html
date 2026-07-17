@@ -743,7 +743,11 @@
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           var apiResp = JSON.parse(xhr.responseText);
-          var rawContent = atob(apiResp.content.replace(/\n/g, ''));
+          // UTF-8 安全解码 base64（支持中文）
+          var binStr = atob(apiResp.content.replace(/\n/g, ''));
+          var bytes = new Uint8Array(binStr.length);
+          for (var i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+          var rawContent = new TextDecoder().decode(bytes);
           var data = JSON.parse(rawContent);
           allProducts = Array.isArray(data) ? data : (data && Array.isArray(data.products) ? data.products : []);
           if (allProducts.length === 0) { showEmpty('暂无商品数据。'); return; }
