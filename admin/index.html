@@ -23,7 +23,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 .btn-danger{background:#bbb;color:#fff}
 .btn-danger:hover{background:#999}
 .btn-sm{padding:5px 12px;font-size:12px}
-.btn-success{background:#52c41a;color:#fff}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #f0f0f0}
 th{background:#fafafa;font-weight:600;color:#666;font-size:12px;white-space:nowrap}
@@ -46,37 +45,30 @@ td img{width:46px;height:46px;object-fit:cover;border-radius:4px}
 .modal-box{background:#fff;border-radius:12px;padding:28px;width:90%;max-width:620px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
 .modal-box h2{margin-bottom:16px;font-size:17px}
 .modal-box .btn{margin-top:8px;margin-right:8px}
-.form-hint{font-size:11px;color:#bbb;margin-top:2px}
 @media(max-width:768px){.form-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
 <div class="header">&#x2605; 后台管理 <span class="sub">商品增删改查</span></div>
 <div class="container">
 
-<!-- Login -->
 <div id="loginBox" class="login-box card">
   <h2>🔑 输入 GitHub Token</h2>
-  <p>请输入你的 Personal Access Token 以管理商品</p>
-  <input type="password" id="tokenInput" placeholder="以 ghp_ 开头的 Token" autocomplete="off">
+  <p>请输入你的 Personal Access Token</p>
+  <input type="password" id="tokenInput" placeholder="以 ghp_ 开头" autocomplete="off">
   <button class="btn btn-primary" onclick="login()" style="width:100%">登录</button>
   <div id="loginError" style="color:#c00;font-size:13px;margin-top:8px;display:none"></div>
 </div>
 
-<!-- Loading -->
 <div id="loading"><p>加载中…</p></div>
 
-<!-- Error -->
 <div id="error">
   <p id="errorMsg">加载失败</p>
   <button class="btn btn-primary" onclick="loadProducts()">重试</button>
   <button class="btn btn-danger" onclick="logout()">更换 Token</button>
 </div>
 
-<!-- Content -->
 <div id="content" style="display:none">
-  <!-- Toolbar -->
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
     <div style="font-size:14px;color:#666">共 <strong id="count" style="color:#E4393C">0</strong> 件商品</div>
     <div>
@@ -84,30 +76,26 @@ td img{width:46px;height:46px;object-fit:cover;border-radius:4px}
       <button class="btn btn-danger" onclick="logout()">退出登录</button>
     </div>
   </div>
-
-  <!-- Table -->
   <div class="card" style="padding:0;overflow-x:auto">
     <table>
       <thead><tr>
         <th>图片</th><th>名称</th><th>价格</th><th>分类</th>
-        <th>📞 电话</th><th>💬 微信</th><th>库存</th><th>已售</th><th>操作</th>
+        <th>电话</th><th>微信</th><th>库存</th><th>已售</th><th>操作</th>
       </tr></thead>
       <tbody id="productBody"></tbody>
     </table>
   </div>
 </div>
-
 </div>
 
-<!-- Edit Modal -->
 <div class="modal" id="editModal">
   <div class="modal-box">
     <h2 id="modalTitle">编辑商品</h2>
     <div class="form-row">
-      <div><label>商品名称 *</label><input id="f_title" placeholder="输入名称"></div>
+      <div><label>商品名称 *</label><input id="f_title"></div>
       <div><label>价格 *</label><input id="f_price" placeholder="如 128.00"></div>
     </div>
-    <div class="form-row full"><label>描述</label><textarea id="f_desc" placeholder="商品描述"></textarea></div>
+    <div class="form-row full"><label>描述</label><textarea id="f_desc"></textarea></div>
     <div class="form-row">
       <div><label>分类</label><input id="f_cat" placeholder="如 手机、数码、家居"></div>
       <div><label>📞 厂家电话</label><input id="f_phone" placeholder="如 13800138000"></div>
@@ -120,7 +108,6 @@ td img{width:46px;height:46px;object-fit:cover;border-radius:4px}
       <div><label>📊 已卖货量</label><input id="f_sold" placeholder="如 0" type="number"></div>
       <div><label>图片链接</label><input id="f_image" placeholder="https://..."></div>
     </div>
-    <div class="form-hint" style="margin-bottom:8px">* 为必填项</div>
     <div>
       <button class="btn btn-primary" id="saveBtn" onclick="saveProduct()">💾 保存</button>
       <button class="btn btn-danger" onclick="closeModal()">取消</button>
@@ -130,182 +117,166 @@ td img{width:46px;height:46px;object-fit:cover;border-radius:4px}
 </div>
 
 <script>
-const OWNER = "WHNXBB";
-const REPO = "Lijing-sshop";
-const FILE = "products.json";
-
-var TOKEN = "";
-var products = [];
-var editIndex = -1;
-var currentSHA = "";
+const OWNER = "WHNXBB", REPO = "Lijing-sshop", FILE = "products.json";
+var TOKEN = "", products = [], editIndex = -1, currentSHA = "";
 
 function $(id){return document.getElementById(id)}
 
-/* ====== Base64 (Unicode safe) ====== */
+/* Unicode-safe Base64 */
 function utf8ToB64(str) {
-  const bytes = new TextEncoder().encode(str);
-  let bin = '';
-  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin);
+  const b = new TextEncoder().encode(str); let s='';
+  for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]);
+  return btoa(s);
 }
 function b64ToUtf8(b64) {
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return new TextDecoder().decode(bytes);
+  const s=atob(b64), b=new Uint8Array(s.length);
+  for(let i=0;i<s.length;i++) b[i]=s.charCodeAt(i);
+  return new TextDecoder().decode(b);
 }
 
-/* ====== Auth ====== */
+function hd(){ return {Authorization:'token '+TOKEN, Accept:'application/vnd.github.v3+json'} }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
 function logout(){
-  localStorage.removeItem("adminToken");
-  TOKEN = ""; $("loginBox").style.display = "block";
-  $("content").style.display = "none"; $("loading").style.display = "none"; $("error").style.display = "none";
+  localStorage.removeItem("adminToken"); TOKEN='';
+  $("loginBox").style.display='block'; $("content").style.display='none';
+  $("loading").style.display='none'; $("error").style.display='none';
 }
 
 function login(){
-  const t = $("tokenInput").value.trim();
-  if(!t.startsWith("ghp_")){
-    $("loginError").style.display = "block"; $("loginError").textContent = "请输入有效的 Token（以 ghp_ 开头）";
-    return;
-  }
-  $("loginError").style.display = "none"; TOKEN = t;
-  localStorage.setItem("adminToken", TOKEN); loadProducts();
+  const t=$("tokenInput").value.trim();
+  if(!t.startsWith("ghp_")){ $("loginError").style.display='block'; $("loginError").textContent='Token 无效'; return; }
+  $("loginError").style.display='none'; TOKEN=t;
+  localStorage.setItem("adminToken",TOKEN); loadProducts();
 }
 
-document.addEventListener("DOMContentLoaded", function(){
-  const saved = localStorage.getItem("adminToken");
-  if(saved && saved.startsWith("ghp_")){ TOKEN = saved; $("tokenInput").value="••••••••••"; loadProducts(); }
+document.addEventListener("DOMContentLoaded",function(){
+  const s=localStorage.getItem("adminToken");
+  if(s&&s.startsWith("ghp_")){ TOKEN=s; $("tokenInput").value='••••••••••'; loadProducts(); }
 });
 
-function hd(){ return {Authorization:`token ${TOKEN}`, Accept:"application/vnd.github.v3+json"} }
-
-/* ====== CRUD ====== */
 async function loadProducts(){
-  $("loading").style.display="block"; $("error").style.display="none"; $("content").style.display="none";
+  $("loading").style.display='block'; $("error").style.display='none'; $("content").style.display='none';
   try {
-    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {headers:hd()});
-    if(r.status===401||r.status===403){ logout(); $("loginBox").style.display="block"; $("loginError").textContent="Token 无效，请重新输入"; $("loginError").style.display="block"; return; }
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    currentSHA = d.sha;
-    const txt = b64ToUtf8(d.content);
-    products = JSON.parse(txt);
+    const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`,{headers:hd()});
+    if(r.status===401||r.status===403){ logout(); $("loginError").textContent='Token 无效，请重新输入'; $("loginError").style.display='block'; return; }
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    currentSHA=d.sha;
+    products=JSON.parse(b64ToUtf8(d.content));
     renderTable();
-    $("loading").style.display="none"; $("content").style.display="block";
+    $("loading").style.display='none'; $("content").style.display='block';
   } catch(e) {
-    $("loading").style.display="none"; $("error").style.display="block"; $("errorMsg").textContent="加载失败: "+e.message;
+    $("loading").style.display='none'; $("error").style.display='block'; $("errorMsg").textContent='加载失败: '+e.message;
   }
 }
 
 function renderTable(){
-  $("productBody").innerHTML = products.map((p,i) => `<tr>
-    <td><img src="${esc(p.image||'')}" onerror="this.style.display='none'" alt=""></td>
-    <td><strong>${esc(p.title)}</strong></td>
-    <td style="color:#E4393C;font-weight:600">¥${Number(p.price).toFixed(2)}</td>
-    <td>${p.category ? '<span class="badge badge-blue">'+esc(p.category)+'</span>' : '-'}</td>
-    <td>${p.phone ? '<span class="badge badge-green">'+esc(p.phone)+'</span>' : '<span style="color:#ccc">-</span>'}</td>
-    <td>${p.wechat ? '<span class="badge badge-orange">'+esc(p.wechat)+'</span>' : '<span style="color:#ccc">-</span>'}</td>
-    <td style="text-align:center">${p.stock!==undefined ? p.stock : '-'}</td>
-    <td style="text-align:center">${p.sold!==undefined ? p.sold : '-'}</td>
-    <td class="actions">
-      <button class="btn btn-primary btn-sm" onclick="openEditModal(${i})">编辑</button>
-      <button class="btn btn-danger btn-sm" onclick="deleteProduct(${i})">删除</button>
-    </td>
-  </tr>`).join('');
-  $("count").textContent = products.length;
+  $("productBody").innerHTML=products.map((p,i)=>'<tr>'+
+    '<td><img src="'+esc(p.image||'')+'" onerror="this.style.display=\'none\'"></td>'+
+    '<td><strong>'+esc(p.title)+'</strong></td>'+
+    '<td style="color:#E4393C;font-weight:600">¥'+Number(p.price).toFixed(2)+'</td>'+
+    '<td>'+(p.category?'<span class="badge badge-blue">'+esc(p.category)+'</span>':'-')+'</td>'+
+    '<td>'+(p.phone?'<span class="badge badge-green">'+esc(p.phone)+'</span>':'<span style="color:#ccc">-</span>')+'</td>'+
+    '<td>'+(p.wechat?'<span class="badge badge-orange">'+esc(p.wechat)+'</span>':'<span style="color:#ccc">-</span>')+'</td>'+
+    '<td style="text-align:center">'+(p.stock!==undefined?p.stock:'-')+'</td>'+
+    '<td style="text-align:center">'+(p.sold!==undefined?p.sold:'-')+'</td>'+
+    '<td class="actions">'+
+      '<button class="btn btn-primary btn-sm" onclick="openEditModal('+i+')">编辑</button>'+
+      '<button class="btn btn-danger btn-sm" onclick="deleteProduct('+i+')">删除</button>'+
+    '</td></tr>').join('');
+  $("count").textContent=products.length;
 }
-
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 
 function openAddModal(){
-  editIndex=-1; $("modalTitle").textContent="添加商品";
-  ["f_title","f_price","f_desc","f_cat","f_phone","f_wechat","f_stock","f_sold","f_image"].forEach(id=>$(id).value="");
-  $("f_stock").value="100"; $("f_sold").value="0";
-  $("saveStatus").style.display="none"; $("editModal").classList.add("active");
+  editIndex=-1; $("modalTitle").textContent='添加商品';
+  ['f_title','f_price','f_desc','f_cat','f_phone','f_wechat','f_stock','f_sold','f_image'].forEach(i=>$(i).value='');
+  $("f_stock").value='100'; $("f_sold").value='0';
+  $("saveStatus").style.display='none'; $("editModal").classList.add('active');
 }
 
-function openEditModal(idx){
-  editIndex=idx; const p=products[idx];
-  $("modalTitle").textContent="编辑商品";
-  $("f_title").value=p.title||""; $("f_price").value=p.price||"";
-  $("f_desc").value=p.description||""; $("f_cat").value=p.category||"";
-  $("f_phone").value=p.phone||""; $("f_wechat").value=p.wechat||"";
-  $("f_stock").value=p.stock!==undefined?p.stock:"100";
-  $("f_sold").value=p.sold!==undefined?p.sold:"0";
-  $("f_image").value=p.image||"";
-  $("saveStatus").style.display="none"; $("editModal").classList.add("active");
+function openEditModal(i){
+  editIndex=i; const p=products[i]; $("modalTitle").textContent='编辑商品';
+  $("f_title").value=p.title||''; $("f_price").value=p.price||'';
+  $("f_desc").value=p.description||''; $("f_cat").value=p.category||'';
+  $("f_phone").value=p.phone||''; $("f_wechat").value=p.wechat||'';
+  $("f_stock").value=p.stock!==undefined?p.stock:'100';
+  $("f_sold").value=p.sold!==undefined?p.sold:'0';
+  $("f_image").value=p.image||'';
+  $("saveStatus").style.display='none'; $("editModal").classList.add('active');
 }
 
-function closeModal(){ $("editModal").classList.remove("active"); }
+function closeModal(){ $("editModal").classList.remove('active'); }
 
 async function saveProduct(){
-  const p = {
-    title: $("f_title").value.trim(), price: $("f_price").value.trim(),
-    description: $("f_desc").value.trim(), category: $("f_cat").value.trim(),
-    phone: $("f_phone").value.trim(), wechat: $("f_wechat").value.trim(),
-    stock: parseInt($("f_stock").value) || 0,
-    sold: parseInt($("f_sold").value) || 0,
-    image: $("f_image").value.trim()
+  const p={
+    title:$("f_title").value.trim(), price:$("f_price").value.trim(),
+    description:$("f_desc").value.trim(), category:$("f_cat").value.trim(),
+    phone:$("f_phone").value.trim(), wechat:$("f_wechat").value.trim(),
+    stock:parseInt($("f_stock").value)||0, sold:parseInt($("f_sold").value)||0,
+    image:$("f_image").value.trim()
   };
-  if(!p.title || !p.price){ alert("请填写商品名称和价格"); return; }
+  if(!p.title||!p.price){ alert('请填写名称和价格'); return; }
 
-  const btn = $("saveBtn"); const st = $("saveStatus");
-  btn.disabled=true; btn.innerHTML="⏳ 保存中…";
-  st.style.display="inline"; st.innerHTML='<span class="badge badge-orange">⏳ 正在保存…</span>';
+  const btn=$("saveBtn"), st=$("saveStatus");
+  btn.disabled=true; btn.innerHTML='⏳ 保存中…';
+  st.style.display='inline'; st.innerHTML='<span class="badge badge-orange">⏳ 保存中…</span>';
 
   try {
+    // 先获取最新 SHA
+    const sr=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`,{headers:hd()});
+    if(sr.ok){ const sd=await sr.json(); currentSHA=sd.sha; }
+
     if(editIndex>=0) products[editIndex]=p; else products.push(p);
-    const content = utf8ToB64(JSON.stringify(products,null,2));
-    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {
-      method: "PUT",
-      headers: {...hd(), "Content-Type":"application/json"},
-      body: JSON.stringify({
-        message: editIndex>=0 ? `编辑商品: ${p.title}` : `添加商品: ${p.title}`,
-        content, sha: currentSHA, branch:"main"
+    const content=utf8ToB64(JSON.stringify(products,null,2));
+
+    const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`,{
+      method:'PUT',
+      headers:{...hd(),'Content-Type':'application/json'},
+      body:JSON.stringify({
+        message: editIndex>=0?'编辑: '+p.title:'添加: '+p.title,
+        content, sha:currentSHA, branch:'main'
       })
     });
     if(!r.ok){
-      const err = await r.text();
-      throw new Error(`HTTP ${r.status}: ${err.slice(0,100)}`);
+      const err=await r.text();
+      if(r.status===409) throw new Error('数据冲突，请重新加载后重试');
+      throw new Error('HTTP '+r.status+': '+err.slice(0,100));
     }
-    const d = await r.json();
-    currentSHA = d.content.sha;
+    const d=await r.json();
+    currentSHA=d.content.sha;
     st.innerHTML='<span class="badge badge-green">✅ 保存成功！</span>';
     renderTable();
-    setTimeout(()=>{ closeModal(); st.style.display="none"; }, 800);
+    setTimeout(()=>{ closeModal(); st.style.display='none'; },800);
   } catch(e) {
-    st.innerHTML='<span style="color:#c00">❌ 失败: '+e.message+'</span>';
+    st.innerHTML='<span style="color:#c00">❌ '+e.message+'</span>';
   }
-  btn.disabled=false; btn.innerHTML="💾 保存";
+  btn.disabled=false; btn.innerHTML='💾 保存';
 }
 
-async function deleteProduct(idx){
-  if(!confirm(`确定要删除「${products[idx].title}」吗？`)) return;
+async function deleteProduct(i){
+  if(!confirm('确定删除「'+products[i].title+'」吗？')) return;
   try {
-    const t = products[idx].title;
-    products.splice(idx,1);
-    const content = utf8ToB64(JSON.stringify(products,null,2));
-    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {
-      method: "PUT",
-      headers: {...hd(), "Content-Type":"application/json"},
-      body: JSON.stringify({message: `删除商品: ${t}`, content, sha: currentSHA, branch:"main"})
+    const t=products[i].title; products.splice(i,1);
+    const content=utf8ToB64(JSON.stringify(products,null,2));
+    const sr=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`,{headers:hd()});
+    if(sr.ok){ const sd=await sr.json(); currentSHA=sd.sha; }
+    const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`,{
+      method:'PUT',
+      headers:{...hd(),'Content-Type':'application/json'},
+      body:JSON.stringify({message:'删除: '+t, content, sha:currentSHA, branch:'main'})
     });
     if(!r.ok){
-      const err = await r.text();
-      // 409 = SHA conflict, reload data
-      if(r.status===409){ alert("数据冲突，已重新加载，请再试一次"); await loadProducts(); return; }
-      throw new Error(`HTTP ${r.status}`);
+      if(r.status===409){ alert('数据冲突，已重新加载'); await loadProducts(); return; }
+      throw new Error('HTTP '+r.status);
     }
-    const d = await r.json();
-    currentSHA = d.content.sha;
+    const d=await r.json();
+    currentSHA=d.content.sha;
     renderTable();
-  } catch(e){
-    alert("删除失败: "+e.message);
-    await loadProducts();
-  }
+  } catch(e){ alert('删除失败: '+e.message); await loadProducts(); }
 }
 
-document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 </script>
 </body>
 </html>
