@@ -1,5 +1,4 @@
 # Cloudflare Pages 路由重定向规则
-# 确保 SPA 路径刷新时正确返回文件
+# 确保 /admin 路径刷新时正确返回页面
 
-/admin/*    /admin/index.html   200
-/_redirects /_redirects          200
+/admin/*  /admin/index.html  200
