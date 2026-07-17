@@ -4,58 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex,nofollow">
-  <title>后台管理 — 商品管理</title>
-  <style>
-    /* Sveltia CMS 加载前的过渡样式 */
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #f5f5f5;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
-    .cms-loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      color: #666;
-    }
-    .cms-loading .spinner {
-      width: 40px;
-      height: 40px;
-      margin-bottom: 16px;
-      border: 4px solid #e0e0e0;
-      border-top-color: #2563eb;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .cms-loading p {
-      font-size: 15px;
-      margin: 0;
-    }
-  </style>
+  <title>后台管理</title>
+  <link rel="cms-config-url" href="/admin/config.yml">
 </head>
 <body>
-  <div class="cms-loading" id="cms-loading">
-    <div class="spinner"></div>
+  <div id="cms-loading" style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#666;">
     <p>正在加载后台管理面板…</p>
   </div>
 
-  <!-- Sveltia CMS CDN — 轻量级无头 CMS，<300KB -->
-  <!-- 兼容 Decap CMS 的 config.yml 语法 -->
   <script src="https://cdn.jsdelivr.net/npm/@sveltia/cms@0.171.1/dist/sveltia-cms.js"></script>
 
   <script>
-    // Sveltia CMS 加载完成后隐藏 loading 动画
+    // 捕获 CMS 加载完成事件
     document.addEventListener('sveltia-cms-loaded', function () {
-      var loadingEl = document.getElementById('cms-loading');
-      if (loadingEl) {
-        loadingEl.style.display = 'none';
+      var el = document.getElementById('cms-loading');
+      if (el) el.style.display = 'none';
+    });
+
+    // 捕获全局未捕获错误并在页面显示
+    window.addEventListener('error', function (e) {
+      var el = document.getElementById('cms-loading');
+      if (el) {
+        el.innerHTML = '<div style="color:#c00;text-align:center;padding:40px;">'
+          + '<h2>加载错误</h2>'
+          + '<pre style="font-size:13px;max-width:600px;text-align:left;background:#f5f5f5;padding:16px;border-radius:8px;overflow:auto;">'
+          + (e.message || e.error?.message || '未知错误')
+          + '</pre></div>';
       }
     });
   </script>
