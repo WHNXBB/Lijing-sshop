@@ -3,9 +3,6 @@ backend:
   repo: WHNXBB/Lijing-sshop
   branch: main
 
-# 使用 Sveltia CMS 内置的 GraphQL 方式访问数据
-publish_mode: editorial_workflow
-
 media_folder: "assets/images/products"
 public_folder: "/assets/images/products"
 
@@ -20,48 +17,32 @@ collections:
     delete: true
     slug: "{{slug}}"
     summary: "{{title}} — ¥{{price}}"
-
     fields:
       - label: "商品名称"
         name: "title"
         widget: "string"
         required: true
-
       - label: "价格"
         name: "price"
         widget: "string"
         required: true
-        hint: "例如：128.00（不需要加 ¥ 符号）"
-
       - label: "商品描述"
         name: "description"
         widget: "text"
         required: true
-
       - label: "分类"
         name: "category"
         widget: "string"
         required: false
-        hint: "例如：手机、数码、家居、配件"
-
       - label: "厂家电话"
         name: "phone"
         widget: "string"
         required: false
-        hint: "例如：13800138000"
-
       - label: "厂家微信"
         name: "wechat"
         widget: "string"
         required: false
-        hint: "例如：wechat_id"
-
       - label: "商品主图"
         name: "image"
         widget: "image"
         required: true
-        hint: "建议使用 1:1 比例或宽度至少 600px 的图片"
-        media_library:
-          name: "uploadcare"
-          config:
-            multiple: false
