@@ -1,37 +1,278 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex,nofollow">
-  <title>后台管理</title>
-  <link rel="cms-config-url" href="/admin/config.yml">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台管理 — 商品管理</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;color:#333}
+.header{background:#E4393C;color:#fff;padding:16px 24px;font-size:20px;font-weight:700}
+.container{max-width:1200px;margin:0 auto;padding:20px 24px}
+.card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:20px;margin-bottom:20px}
+.card h2{font-size:16px;margin-bottom:16px;color:#333}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row.full{grid-template-columns:1fr}
+.form-row label{font-size:13px;color:#666;display:block;margin-bottom:4px}
+.form-row input,.form-row textarea,.form-row select{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px}
+.form-row textarea{resize:vertical;min-height:60px}
+.btn{padding:8px 20px;border:none;border-radius:4px;font-size:14px;cursor:pointer}
+.btn-primary{background:#E4393C;color:#fff}
+.btn-primary:hover{background:#c12e30}
+.btn-danger{background:#999;color:#fff;font-size:13px}
+.btn-danger:hover{background:#777}
+.btn-sm{padding:4px 12px;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #f0f0f0}
+th{background:#fafafa;font-weight:600;color:#666;font-size:12px}
+td{vertical-align:top}
+td img{width:50px;height:50px;object-fit:cover;border-radius:4px}
+.actions{white-space:nowrap}
+.actions button{margin-right:4px}
+.status{display:inline-block;padding:4px 12px;border-radius:4px;font-size:12px}
+.status.loading{background:#fff3cd;color:#856404}
+.status.success{background:#d4edda;color:#155724}
+.status.error{background:#f8d7da;color:#721c24}
+.login-box{max-width:400px;margin:80px auto;text-align:center}
+.login-box h2{margin-bottom:12px;font-size:18px}
+.login-box p{font-size:13px;color:#999;margin-bottom:16px}
+.login-box input{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:4px;font-size:14px;margin-bottom:12px;text-align:center}
+#loading{display:none;text-align:center;padding:60px}
+#error{display:none;text-align:center;padding:60px}
+#error p{color:#c00;margin-bottom:12px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center;z-index:999}
+.modal.active{display:flex}
+.modal-box{background:#fff;border-radius:12px;padding:28px;width:90%;max-width:600px;max-height:90vh;overflow-y:auto;position:relative}
+.modal-box h2{margin-bottom:16px}
+.modal-box .btn{margin-top:12px;margin-right:8px}
+@media(max-width:768px){.form-row{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div id="cms-loading" style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#666;">
-    <p>正在加载后台管理面板…</p>
+
+<div class="header">&#x2605; 后台管理 — 商品管理</div>
+<div class="container">
+
+<!-- Login -->
+<div id="loginBox" class="login-box card">
+  <h2>🔑 输入访问令牌</h2>
+  <p>请输入你的 GitHub Personal Access Token 以管理商品数据</p>
+  <input type="password" id="tokenInput" placeholder="输入 ghp_... 开头的 Token" autocomplete="off">
+  <button class="btn btn-primary" onclick="login()" style="width:100%">登录</button>
+  <p style="margin-top:12px;font-size:12px;color:#999">Token 仅保存在你的浏览器本地，不会上传到其他服务器</p>
+  <div id="loginError" style="color:#c00;font-size:13px;margin-top:8px;display:none"></div>
+</div>
+
+<!-- Loading -->
+<div id="loading"><p>正在加载商品数据…</p></div>
+
+<!-- Error -->
+<div id="error">
+  <p id="errorMsg">加载失败</p>
+  <button class="btn btn-primary" onclick="loadProducts()">重试</button>
+  <button class="btn btn-danger" onclick="logout()" style="margin-left:8px">更换 Token</button>
+</div>
+
+<!-- Content -->
+<div id="content" style="display:none">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+      <h2 style="margin:0">商品列表 <span id="count" style="font-weight:400;color:#999;font-size:13px"></span></h2>
+      <div><button class="btn btn-primary" onclick="openAddModal()">+ 添加商品</button>
+      <button class="btn btn-danger" onclick="logout()" style="margin-left:6px">退出</button></div>
+    </div>
+    <div style="overflow-x:auto">
+      <table id="productTable">
+        <thead><tr>
+          <th>图片</th><th>名称</th><th>价格</th><th>分类</th><th>电话</th><th>微信</th><th>操作</th>
+        </tr></thead>
+        <tbody id="productBody"></tbody>
+      </table>
+    </div>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@sveltia/cms@0.171.1/dist/sveltia-cms.js"></script>
+</div>
 
-  <script>
-    // 捕获 CMS 加载完成事件
-    document.addEventListener('sveltia-cms-loaded', function () {
-      var el = document.getElementById('cms-loading');
-      if (el) el.style.display = 'none';
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+  <div class="modal-box">
+    <h2 id="modalTitle">添加商品</h2>
+    <div class="form-row"><label>商品名称</label><input id="f_title" placeholder="输入商品名称"></div>
+    <div class="form-row"><label>价格</label><input id="f_price" placeholder="如 128.00"></div>
+    <div class="form-row full"><label>描述</label><textarea id="f_desc" placeholder="商品描述"></textarea></div>
+    <div class="form-row"><label>分类</label><input id="f_cat" placeholder="如 手机、数码、家居"></div>
+    <div class="form-row"><label>厂家电话</label><input id="f_phone" placeholder="联系电话"></div>
+    <div class="form-row"><label>厂家微信</label><input id="f_wechat" placeholder="微信号"></div>
+    <div class="form-row full"><label>图片链接</label><input id="f_image" placeholder="https://..."></div>
+    <div>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveProduct()">保存</button>
+      <button class="btn btn-danger" onclick="closeModal()">取消</button>
+      <span id="saveStatus" class="status" style="margin-left:8px;display:none"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const OWNER = "WHNXBB";
+const REPO = "Lijing-sshop";
+const FILE = "products.json";
+
+var TOKEN = "";
+var products = [];
+var editIndex = -1;
+
+function $(id){return document.getElementById(id)}
+
+function logout(){
+  localStorage.removeItem("adminToken");
+  TOKEN = "";
+  $("loginBox").style.display = "block";
+  $("content").style.display = "none";
+  $("loading").style.display = "none";
+  $("error").style.display = "none";
+}
+
+function login(){
+  const token = $("tokenInput").value.trim();
+  if(!token || !token.startsWith("ghp_")){
+    $("loginError").style.display = "block";
+    $("loginError").textContent = "请输入有效的 GitHub Token（以 ghp_ 开头）";
+    return;
+  }
+  $("loginError").style.display = "none";
+  TOKEN = token;
+  localStorage.setItem("adminToken", TOKEN);
+  loadProducts();
+}
+
+// Auto-login on page load
+document.addEventListener("DOMContentLoaded", function(){
+  const saved = localStorage.getItem("adminToken");
+  if(saved && saved.startsWith("ghp_")){
+    TOKEN = saved;
+    $("tokenInput").value = "••••••••••••••••";
+    $("loginBox").style.display = "none";
+    loadProducts();
+  }
+});
+
+function getHeaders(){
+  return {Authorization: `token ${TOKEN}`, Accept: "application/vnd.github.v3+json"};
+}
+
+async function loadProducts(){
+  $("loading").style.display = "block";
+  $("error").style.display = "none";
+  $("content").style.display = "none";
+  try {
+    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {headers: getHeaders()});
+    if(r.status === 401 || r.status === 403) { logout(); $("loginError").textContent = "Token 无效或已过期，请重新输入"; $("loginError").style.display = "block"; return; }
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    const txt = atob(d.content.replace(/\n/g,''));
+    products = JSON.parse(txt);
+    if(!document.getElementById("sha")){
+      document.body.insertAdjacentHTML('beforeend',`<input type=hidden id=sha value="${d.sha}">`);
+    } else { document.getElementById("sha").value = d.sha; }
+    renderTable();
+    $("loading").style.display = "none";
+    $("content").style.display = "block";
+  } catch(e) {
+    $("loading").style.display = "none";
+    $("error").style.display = "block";
+    $("errorMsg").textContent = "加载失败: " + e.message;
+  }
+}
+
+function renderTable(){
+  const tbody = $("productBody");
+  $("count").textContent = `(${products.length}件)`;
+  tbody.innerHTML = products.map((p,i) => `<tr>
+    <td><img src="${esc(p.image||'')}" onerror="this.style.display='none'" alt=""></td>
+    <td>${esc(p.title)}</td>
+    <td style="color:#E4393C;font-weight:600">¥${parseFloat(p.price).toFixed(2)}</td>
+    <td>${esc(p.category||'-')}</td>
+    <td>${esc(p.phone||'-')}</td>
+    <td>${esc(p.wechat||'-')}</td>
+    <td class="actions">
+      <button class="btn btn-primary btn-sm" onclick="openEditModal(${i})">编辑</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteProduct(${i})">删除</button>
+    </td>
+  </tr>`).join('');
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function openAddModal(){
+  editIndex = -1; $("modalTitle").textContent = "添加商品";
+  ["f_title","f_price","f_desc","f_cat","f_phone","f_wechat","f_image"].forEach(id => $(id).value="");
+  $("saveStatus").style.display = "none"; $("editModal").classList.add("active");
+}
+
+function openEditModal(idx){
+  editIndex = idx; const p = products[idx];
+  $("modalTitle").textContent = "编辑商品";
+  $("f_title").value = p.title||""; $("f_price").value = p.price||"";
+  $("f_desc").value = p.description||""; $("f_cat").value = p.category||"";
+  $("f_phone").value = p.phone||""; $("f_wechat").value = p.wechat||"";
+  $("f_image").value = p.image||"";
+  $("saveStatus").style.display = "none"; $("editModal").classList.add("active");
+}
+
+function closeModal(){ $("editModal").classList.remove("active"); }
+
+async function saveProduct(){
+  const p = {
+    title: $("f_title").value.trim(), price: $("f_price").value.trim(),
+    description: $("f_desc").value.trim(), category: $("f_cat").value.trim(),
+    phone: $("f_phone").value.trim(), wechat: $("f_wechat").value.trim(),
+    image: $("f_image").value.trim()
+  };
+  if(!p.title || !p.price){alert("请至少填写名称和价格");return}
+  const btn = $("saveBtn"); const st = $("saveStatus");
+  btn.disabled = true; btn.textContent = "保存中…";
+  st.style.display = "inline"; st.className = "status loading"; st.textContent = "正在保存…";
+  try {
+    if(editIndex >= 0) products[editIndex] = p; else products.push(p);
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(products,null,2))));
+    const sha = document.getElementById("sha").value;
+    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {
+      method: "PUT",
+      headers: {...getHeaders(), "Content-Type":"application/json"},
+      body: JSON.stringify({message: editIndex>=0 ? `编辑: ${p.title}` : `添加: ${p.title}`, content, sha, branch:"main"})
     });
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    document.getElementById("sha").value = d.content.sha;
+    st.className = "status success"; st.textContent = "✅ 保存成功！";
+    renderTable();
+    setTimeout(()=>{closeModal();st.style.display="none"},1000);
+  } catch(e) {
+    st.className = "status error"; st.textContent = "❌ 保存失败: "+e.message;
+  }
+  btn.disabled=false; btn.textContent="保存";
+}
 
-    // 捕获全局未捕获错误并在页面显示
-    window.addEventListener('error', function (e) {
-      var el = document.getElementById('cms-loading');
-      if (el) {
-        el.innerHTML = '<div style="color:#c00;text-align:center;padding:40px;">'
-          + '<h2>加载错误</h2>'
-          + '<pre style="font-size:13px;max-width:600px;text-align:left;background:#f5f5f5;padding:16px;border-radius:8px;overflow:auto;">'
-          + (e.message || e.error?.message || '未知错误')
-          + '</pre></div>';
-      }
+async function deleteProduct(idx){
+  if(!confirm(`确定删除「${products[idx].title}」？`)) return;
+  try {
+    const p = products[idx]; products.splice(idx,1);
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(products,null,2))));
+    const sha = document.getElementById("sha").value;
+    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {
+      method: "PUT",
+      headers: {...getHeaders(), "Content-Type":"application/json"},
+      body: JSON.stringify({message: `删除: ${p.title}`, content, sha, branch:"main"})
     });
-  </script>
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    document.getElementById("sha").value = d.content.sha;
+    renderTable();
+  } catch(e){ alert("删除失败: "+e.message); loadProducts(); }
+}
+
+document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
+</script>
 </body>
 </html>
