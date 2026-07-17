@@ -2,12 +2,8 @@ backend:
   name: github
   repo: WHNXBB/Lijing-sshop
   branch: main
-  base_url: https://api.github.com
 
-# 使用 Sveltia CMS 的 GraphQL 批量获取方案，
-# 避免传统 Decap CMS 的 GitHub REST API 关系查询导致的限流问题
-squash_merger: false
-
+# 使用 Sveltia CMS 内置的 GraphQL 方式访问数据
 publish_mode: editorial_workflow
 
 media_folder: "assets/images/products"
@@ -48,21 +44,17 @@ collections:
         required: false
         hint: "例如：手机、数码、家居、配件"
 
-      # === 新增字段：厂家联系方式 ===
       - label: "厂家电话"
         name: "phone"
         widget: "string"
         required: false
         hint: "例如：13800138000"
-        default: "13800138000"
 
       - label: "厂家微信"
         name: "wechat"
         widget: "string"
         required: false
         hint: "例如：wechat_id"
-        default: "wechat_id"
-      # === 新增字段结束 ===
 
       - label: "商品主图"
         name: "image"
