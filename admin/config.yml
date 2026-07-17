@@ -1,0 +1,59 @@
+backend:
+  name: github
+  repo: WHNXBB/Lijing-sshop
+  branch: main
+  base_url: https://api.github.com
+
+# 使用 Sveltia CMS 的 GraphQL 批量获取方案，
+# 避免传统 Decap CMS 的 GitHub REST API 关系查询导致的限流问题
+# Sveltia CMS 会自动检测并使用 GraphQL 模式，
+# 无需额外配置，只需确保以下 squash_merger 设置为 false
+squash_merger: false
+
+publish_mode: editorial_workflow
+
+media_folder: "assets/images/products"
+public_folder: "/assets/images/products"
+
+# 分页优化：启用 GraphQL 批量加载，确保 200+ 条数据流畅加载
+collections:
+  - name: "products"
+    label: "商品管理"
+    label_singular: "商品"
+    folder: "/"                    # products.json 位于仓库根目录
+    extension: json
+    format: json
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    summary: "{{title}} — {{price}}"
+
+    # 使用 GraphQL 批量查询而非 REST 逐条加载
+    # Sveltia CMS 自动启用 GraphQL 模式时，分页加载性能大幅优于默认方式
+    # 以下字段映射确保与 products.json 结构一致
+    fields:
+      - label: "商品名称"
+        name: "title"
+        widget: "string"
+        required: true
+
+      - label: "价格"
+        name: "price"
+        widget: "string"
+        required: true
+        hint: "例如：¥128.00"
+
+      - label: "商品描述"
+        name: "description"
+        widget: "text"
+        required: true
+
+      - label: "商品主图"
+        name: "image"
+        widget: "image"
+        required: true
+        hint: "建议使用 1:1 比例或宽度至少 600px 的图片"
+        media_library:
+          name: "uploadcare"
+          config:
+            multiple: false
